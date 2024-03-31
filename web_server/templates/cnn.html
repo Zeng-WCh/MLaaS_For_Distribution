@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MLaaS 用户界面</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.staticfile.net/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
+    />
+    <script src="https://cdn.staticfile.net/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.net/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/home">欢迎使用 MLaaS</a>
+        </div>
+        <div>
+          <ul class="navbar-form navbar-left">
+            <a class="btn btn-default" href="/training"> 训练模型 </a>
+            <a class="btn btn-default" href="/history"> 训练历史 </a>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                {{ username }} <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="/setting">设置</a></li>
+                <li><a href="/password">修改密码</a></li>
+                <li><a href="/logout">退出</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <h1 class="text-center">当前使用选择模型</h1>
+
+      <div class="text-center"><h3>{{ model }}</h3></div>
+    </div>
+    <div class="container">
+      <h4 class="text-center">模型参数设置</h4>
+
+      <form method="POST" action="/upload_param">
+        {{ form.csrf_token }} {{ form.hidden_tag() }} {% for field in form %} {%
+        if field.type != 'hidden' %}
+        <div class="mb-3">
+          <label class="form-label">{{ field.label }}</label>{{
+          field(class="form-control") }}
+        </div>
+        {% endif %} {% endfor %}
+      </form>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %} {% if category ==
+    'alert' %}
+    <script type="text/javascript">
+      alert("{{ message }}");
+    </script>
+    {% endif %} {% endfor %} {% endif %} {% endwith %}
+  </body>
+</html>

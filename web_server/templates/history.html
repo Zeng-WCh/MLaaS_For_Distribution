@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MLaaS 用户界面</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.staticfile.net/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
+    />
+    <script src="https://cdn.staticfile.net/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.net/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/home">欢迎使用 MLaaS</a>
+        </div>
+        <div>
+          <ul class="navbar-form navbar-left">
+            <a class="btn btn-default" href="/training"> 训练模型 </a>
+            <a class="btn btn-default" href="/history"> 训练历史 </a>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                {{ username }} <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="/setting">设置</a></li>
+                <li><a href="/password">修改密码</a></li>
+                <li><a href="/logout">退出</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container">
+      {% if data %}
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th class="text-center">模型名称</th>
+            <th class="text-center">创建时间</th>
+            <th class="text-center">训练状态</th>
+            <th class="text-center">完成时间</th>
+            <th class="text-center">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in data %} 
+            {% if item.training_status == "completed" %}
+            <tr class="success">
+            {% elif item.training_status == "pending" %}
+            <tr class="active">
+            {% elif item.training_status == "running" %}
+            <tr class="warning">
+            {% elif item.training_status == "failed" %}
+            <tr class="danger">
+            {% else %}
+            {% endif %}
+              <td class="text-center">{{ item.model_choice }}</td>
+              <td class="text-center">{{ item.submit_date }}</td>
+              {% if item.training_status == "completed" %}
+              <td class="text-center">训练完成</td>
+              {% elif item.training_status == "pending" %}
+              <td class="text-center">等待中</td>
+              {% elif item.training_status == "running" %}
+              <td class="text-center">训练中</td>
+              {% elif item.training_status == "failed" %}
+              <td class="text-center">训练失败</td>
+              {% else %}
+              {% endif %} {% if item.completed_at %}
+              <td class="text-center">{{ item.completed_at }}</td>
+              {% else %}
+              <td class="text-center">-</td>
+              {% endif %} {% if item.training_status == "completed" %}
+              <td class="text-center">
+                <a href="/download/{{ item.model_id }}">下载模型</a>
+              </td>
+              {% else %}
+              <td class="text-center">-</td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-center">暂无训练历史</p>
+      {% endif %}
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %} {% if category ==
+    'alert' %}
+    <script type="text/javascript">
+      alert("{{ message }}");
+    </script>
+    {% endif %} {% endfor %} {% endif %} {% endwith %}
+  </body>
+</html>

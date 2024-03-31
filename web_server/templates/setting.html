@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MLaaS 用户界面</title>
+    <style>
+      .container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-top: 100px;
+      }
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      input[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        background-color: #4caf50;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.staticfile.net/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
+    />
+    <script src="https://cdn.staticfile.net/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.net/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/home">欢迎使用 MLaaS</a>
+        </div>
+        <div>
+          <ul class="navbar-form navbar-left">
+            <a class="btn btn-default" href="/training"> 训练模型 </a>
+            <a class="btn btn-default" href="/history"> 训练历史 </a>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                {{ username }} <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="/setting">设置</a></li>
+                <li><a href="/password">修改密码</a></li>
+                <li><a href="/logout">退出</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <h3 class="text-center">更新用户信息</h3>
+      <form method="POST" action="/setting">
+        {{ form.csrf_token }} {{ form.hidden_tag() }}
+        <div class="form-group">
+          用户名 {{ form.username(class="form-control") }}
+        </div>
+        <div class="form-group">
+          邮箱地址 {{ form.email(class="form-control") }}
+        </div>
+        {{ form.submit(class="btn btn-primary") }}
+      </form>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %} {% if category ==
+    'alert' %}
+    <script type="text/javascript">
+      alert("{{ message }}");
+    </script>
+    {% endif %} {% endfor %} {% endif %} {% endwith %}
+  </body>
+</html>

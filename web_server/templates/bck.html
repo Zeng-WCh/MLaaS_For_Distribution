@@ -1,0 +1,12 @@
+<form id="model-form" method="POST" action="/process">
+  <div class="form-group">
+    <label for="model-select">Select a Model:</label>
+    <select class="form-control" id="model-select" name="model">
+      {% for model_name, model_value in models.items() %}
+      <option value="{{ model_value }}">{{ model_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <button type="submit" class="btn btn-primary hidden">Submit</button>
+</form>
