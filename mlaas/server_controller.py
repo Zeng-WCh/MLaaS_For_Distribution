@@ -73,22 +73,28 @@ def send_broadcast(broadcast_addr: str, port: int, message: str):
     sock.close()
 
 
-def check_worker_status(lock):
+def check_worker_status(log: logging.Logger, lock):
     lock.acquire()
 
+    dying_workers = list()
+
     for sock in worker_config:
+        log.info(f"Checking worker status {sock}")
         if not worker_config[sock].is_alive():
-            logger.info(
+            log.info(
                 f'Worker {sock[0]}:{sock[1]} can not response to heard beat, disconnected...')
-            worker_config.pop(sock)
-        else:
-            logger.info(
-                f'Worker {sock[0]}:{sock[1]} response to heard beat, alive')
+            dying_workers.append(sock)
+        # else:
+        #     log.info(
+        #         f'Worker {sock[0]}:{sock[1]} is still alive')
+
+    for sock in dying_workers:
+        worker_config.pop(sock)
 
     lock.release()
 
 
-def start_autodetection(server_ip: str, netmask: str):
+def start_autodetection(server_ip: str, netmask: str, lock, log: logging.Logger,):
     broadcast_addr = get_broadcast_address(server_ip, netmask)
 
     package = {
@@ -101,13 +107,16 @@ def start_autodetection(server_ip: str, netmask: str):
     payload = json.dumps(package)
 
     send_broadcast(broadcast_addr, BROADCAST_PORT, payload)
-    # check_worker_status(lock)
+    # check_worker_status(log, lock)
 
 
-def auto_detection_daemon(server_ip, netmask, lock):
-    schedule.every(5).seconds.do(start_autodetection, server_ip, netmask)
+def auto_detection_daemon(server_ip, netmask, lock,):
+    log = init_logger('Auto Detection Daemon',
+                      log_file='auto_detection.log', log_stream=sys.stdout)
+    schedule.every(5).seconds.do(start_autodetection,
+                                 server_ip, netmask, lock, log, )
     schedule.every(CONNECTION_TIMEOUT).seconds.do(
-        check_worker_status, lock)
+        check_worker_status, log, lock)
 
     while True:
         schedule.run_pending()
@@ -396,9 +405,9 @@ if __name__ == '__main__':
     ps_server = Process(target=cunsumer, args=(request_queue, db, ))
     ps_server.start()
 
-    p = Process(target=auto_detection_daemon, args=(
+    t = threading.Thread(target=auto_detection_daemon, args=(
         arguments.server_ip, net_ifs[args.network_interface][1].strip(), worker_lock, ))
-    p.start()
+    t.start()
     # checker.start()
     logger.info(f'Using {args.network_interface} as RPC interface')
     logger.info(f'Controller API is running on port {args.port}')
@@ -408,5 +417,5 @@ if __name__ == '__main__':
     db.close_db()
     request_queue.put('exit')
     ps_server.join()
-    p.join()
+    t.join()
     # checker.join()
